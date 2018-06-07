@@ -55,7 +55,7 @@ class PolymerCarousel extends Mixin(PolymerElement) {
     let prevElement = this.selected && this.selected.previousElementSibling;
     console.log('From Previous :');
     console.log(prevElement);
-    if(prevElement){
+    if(prevElement && this,_touchDirection){
       let current = this.selected;
 
       this._transitionMaker(current, 0);
@@ -72,7 +72,7 @@ class PolymerCarousel extends Mixin(PolymerElement) {
     let nextElement = this.selected && this.selected.nextElementSibling;
     console.log('From Next :');
     console.log(nextElement);
-    if(nextElement){
+    if(nextElement && !this._touchDirection){
       let current = this.selected;
       
       this._transitionMaker(current, 0);
@@ -93,6 +93,9 @@ class PolymerCarousel extends Mixin(PolymerElement) {
 
   _initialiseListeners(){
     this.addEventListener('transitionend', this._resetChildrenStyles.bind(this));
+    this.addEventListener('touchstart', this._touchstart.bind(this));
+    this.addEventListener('touchmove', this._touchmove.bind(this));
+    this.addEventListener('touchend', this._touchend.bind(this));
   }
 
   _resetChildrenStyles(){
@@ -117,6 +120,108 @@ class PolymerCarousel extends Mixin(PolymerElement) {
     element.style.transform = 'translate3d(' + positionTo + 'px, 0, 0)';
   }
 
+  _touchstart(e){
+    console.log('Touch Detected');
+    if(this.childElementCount < 2){
+     return; 
+    }
+
+    if(!this._touchDirection){
+      this._startX = e.changedTouches[0].clientX;
+      this._startY = e.changedTouches[0].clientY;
+    }
+  }
+
+  _touchmove(e){
+    if(this.childElementCount < 2){
+      return; 
+    }
+
+    if(!this._touchDirection){
+      const absX = Math.abs(e.changedTouches[0].clientX - this._startX);
+      const absY = Math.abs(e.changedTouches[0].clientY - this._startY);
+      this._touchDirection = absX > absY ? 'horizontal' : 'vertical';
+    }
+
+    if(this._touchDirection === 'horizontal'){
+      e.preventDefault();
+
+      let dx = Math.round(e.changedTouches[0].clientX - this._startX);
+      const prevElement = this.selected.previousElementSibling;
+      const nextElement = this.selected.nextElementSibling;
+
+      if((!prev && dx > 0) || (!next && dx > 0)){
+        dx = 0;
+      }
+
+      this._transitionMaker(this.selected, dx);
+      if(prevElement){
+        this._transitionMaker(prevElement, dx - this.offsetWidth);
+      }
+      if(nextElement){
+        this._transitionMaker(nextElement, dx + this.offsetWidth);
+      }
+    }
+  }
+
+  _touchend(e){
+    if(this.childElementCount < 2){
+      return; 
+    }
+
+    if(e.touches.length){ // length of array of pending touches
+      return; // Do not end if there are still touches left to process
+    }
+
+    if(this._touchDirection === 'horizontal'){
+      let dx = Math.round(e.changedTouches[0].clientX - this._startX);
+      const prevElement = this.selected.previousElementSibling;
+      const nextElement = this.selected.nextElementSibling;
+
+      if((!prev && dx > 0) || (!next && dx > 0)){
+        dx = 0;
+      }
+      if(dx > 0){
+        if(dx > 100){ // Offset length of a swipe to make a change
+          if(dx === this.offsetWidth){
+            // No transition (Since we are already in the final state)
+            this._resetChildrenStyles();
+          }
+          else{
+            this._transitionMaker(prevElement, 0, true);
+            this._transitionMaker(this.selected, this.offsetWidth, true);
+          }
+          this.selected = prevElement;
+        }
+        else{
+          this._transitionMaker(prevElement, -this.offsetWidth, true);
+          this._transitionMaker(this.selected, 0, true);
+        }
+      }
+      else if(dx < 0){
+        if(dx < -100){
+          if(dx === -this.offsetWidth){
+            // No transition (Since we are already in the final state)
+            this._resetChildrenStyles();
+          }
+          else{
+            this._transitionMaker(this.selected, -this.offsetWidth, true);
+            this._transitionMaker(nextElement, 0, true);
+          }
+          this.selected = nextElement;
+        }
+        else{
+          this._transitionMaker(this.selected, 0, true);
+          this._transitionMaker(nextElement, this.offsetWidth, true);
+        }
+      }
+      else{
+        this._resetChildrenStyles();
+      }
+    }
+
+    this._touchDirection = null;
+  }
 
   static get template() {
     return html`
