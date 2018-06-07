@@ -80,18 +80,18 @@ class PolymerCarousel extends Mixin(PolymerElement) {
 
       this.selected = nextElement;
 
-      this._transitionMaker(nextElement, 0, true);
       this._transitionMaker(current, -this.offsetWidth, true);
+      this._transitionMaker(nextElement, 0, true);
     }
   }
 
   ready(){
     super.ready();
     // console.log('Readied !!!');
-    requestAnimationFrame(this._initialiseListener.bind(this));
+    requestAnimationFrame(this._initialiseListeners.bind(this));
   }
 
-  _initialiseListener(){
+  _initialiseListeners(){
     this.addEventListener('transitionend', this._resetChildrenStyles.bind(this));
   }
 
@@ -113,8 +113,8 @@ class PolymerCarousel extends Mixin(PolymerElement) {
 
   _transitionMaker(element, positionTo, isMoving){
     element.style.display = 'block';
-    element.style.transition = isMoving ? 'all 15s' : '';
-    element.style.transform = 'translateX(' + positionTo + 'px)';
+    element.style.transition = isMoving ? 'transform 0.5s' : '';
+    element.style.transform = 'translate3d(' + positionTo + 'px, 0, 0)';
   }
 
 
@@ -167,4 +167,4 @@ class PolymerCarousel extends Mixin(PolymerElement) {
   // }
 }
 
-window.customElements.define('polymer-carousel', PolymerCarousel);
+customElements.define('polymer-carousel', PolymerCarousel);
