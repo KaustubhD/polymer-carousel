@@ -4,5 +4,18 @@
     "rules": [
       "polymer-3"
     ]
-  }
+  },
+  "entrypoint": "index.html",
+  "sources": [
+    "images/**/*",
+    "mixin-carousel.js",
+    "polymer-carousel.js",
+    "package.json"
+  ],
+  "builds": [{
+   "preset": "es5-bundled",
+   "js": {"compile": true},
+   "bundle": true,
+   "addServiceWorker": false 
+  }]
 }

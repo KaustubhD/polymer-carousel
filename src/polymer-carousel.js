@@ -7,7 +7,6 @@ import { Mixin } from './mixin-carousel.js';
  *
  * @customElement
  * @polymer
- * @demo demo/index.html
  */
 class PolymerCarousel extends Mixin(PolymerElement) {
 
@@ -150,7 +149,7 @@ class PolymerCarousel extends Mixin(PolymerElement) {
       const prevElement = this.selected.previousElementSibling;
       const nextElement = this.selected.nextElementSibling;
 
-      if((!prev && dx > 0) || (!next && dx > 0)){
+      if((!prevElement && dx > 0) || (!nextElement && dx < 0)){
         dx = 0;
       }
 
@@ -178,7 +177,7 @@ class PolymerCarousel extends Mixin(PolymerElement) {
       const prevElement = this.selected.previousElementSibling;
       const nextElement = this.selected.nextElementSibling;
 
-      if((!prev && dx > 0) || (!next && dx > 0)){
+      if((!prevElement && dx > 0) || (!nextElement && dx < 0)){
         dx = 0;
       }
       if(dx > 0){
@@ -249,6 +248,12 @@ class PolymerCarousel extends Mixin(PolymerElement) {
         }
         #nextBut{
           right: 5px;
+        }
+        button:hover{
+          opacity: 1;
+        }
+        button:focus{
+          outline: none;
         }
         button[disabled]{
           opacity: 0.3;
